@@ -14,8 +14,8 @@
 	void WindowSys::initWindow()
 	{
 		glfwInit();
-		glfwInitHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwInitHint(GLFW_RESIZABLE, GLFW_FALSE);
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 		WindowSys::window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
 	}
 
