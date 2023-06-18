@@ -7,6 +7,7 @@
 #include<optional>
 #include "WindowingSystem.hpp"
 #include <set>
+#include <vulkan/vk_enum_string_helper.h>
 
 
 VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
@@ -45,6 +46,13 @@ struct QueueFamilyIndices
     }
 };
 
+struct SwapChainSupportDetails
+{
+    VkSurfaceCapabilitiesKHR capabilities;
+    std::vector<VkSurfaceFormatKHR> surfaceFormats;
+    std::vector<VkPresentModeKHR> presentModes;
+};
+
 class HelloTriangleApplication {
 public:
     void run() {
@@ -64,6 +72,9 @@ private:
     VkQueue graphicsQueue;
     VkQueue presentationQueue;
 
+    const std::vector<const char*> deviceExtensions = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    };
 
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -86,7 +97,7 @@ private:
     }
 
     void createSurface() {
-        if (glfwCreateWindowSurface(myVK_instance, myWindow.getGLFWwindow(), nullptr, &surface) != VK_SUCCESS) {
+       if (glfwCreateWindowSurface(myVK_instance, myWindow.getGLFWwindow(), nullptr, &surface) != VK_SUCCESS) {
             throw std::runtime_error("failed to create window surface!");
         }
     }
@@ -122,8 +133,8 @@ private:
 
         deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
 
-        //something to do with older instances of vulkan
-        deviceCreateInfo.enabledExtensionCount = 0;
+        deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
+        deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
         if (enableValidationLayers) {
             deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
@@ -166,17 +177,76 @@ private:
         return indices;
     }
 
+    SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device)
+    {
+        SwapChainSupportDetails details;
+        uint32_t formatCount;
+        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
+
+        if (formatCount != 0)
+        {
+            details.surfaceFormats.resize(formatCount);
+            vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.surfaceFormats.data());
+        }
+
+        uint32_t presentModeCount;
+        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
+
+        if (presentModeCount != 0) {
+            details.presentModes.resize(presentModeCount);
+            vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data());
+        }
+
+        return details;
+    }
+
+    //chosing colour depth i.e SurfaceFormat
+    VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
+        for (const auto& availableFormat : availableFormats)
+        {
+            //checking if available format is 8bit RGBA and using the srgb colour space
+            if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLORSPACE_SRGB_NONLINEAR_KHR)
+            {
+                return availableFormat;
+            }
+        }
+
+        return availableFormats[0];
+    }
+
+    //This function essentially checks for swap chain support
+    bool checkDeviceExtensionSupport(VkPhysicalDevice device)
+    {
+        uint32_t extensionsCount;
+        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionsCount, nullptr);
+        std::vector<VkExtensionProperties> availableExtensions(extensionsCount);
+        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionsCount, availableExtensions.data());
+
+        std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+
+        for (const auto& extension : availableExtensions) {
+            requiredExtensions.erase(extension.extensionName);
+        }
+
+        return requiredExtensions.empty();
+    }
+
+   
+
     bool isDeviceSuitable(VkPhysicalDevice device)
     {
-        VkPhysicalDeviceProperties deviceProperties;
-       vkGetPhysicalDeviceProperties(device, &deviceProperties);
-
-      VkPhysicalDeviceFeatures deviceFeatures;
-       vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-
+        //device refers to current device as we are enumerating all the devices present on the system
         QueueFamilyIndices indices = findQueueFamilies(device);
+        bool extensionsSupported = checkDeviceExtensionSupport(device);
+        bool swapChainIsAdequate = false;
 
-        return indices.isComplete();
+        if (extensionsSupported)
+        {
+            SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
+            swapChainIsAdequate = !swapChainSupport.surfaceFormats.empty() && !swapChainSupport.presentModes.empty();
+        }
+
+        return indices.isComplete() && extensionsSupported && swapChainIsAdequate;
     }
 
     void pickPhysicalDevice()
@@ -249,6 +319,7 @@ private:
         return true;
     }
 
+    //glfwextenisons
     std::vector<const char*> getRequiredExtensions()
     {
         uint32_t glfwExtensionCount = 0;
@@ -283,6 +354,7 @@ private:
         createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         createInfo.pApplicationInfo = &appInfo;
 
+        //currently gets glfwextensions
         auto extensions = getRequiredExtensions();
 
         createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
@@ -301,8 +373,6 @@ private:
             createInfo.pNext = nullptr;
         }
 
-
-        /* VkResult result = vkCreateInstance(&createInfo, nullptr, &myVK_instance);*/
         if (vkCreateInstance(&createInfo, nullptr, &myVK_instance) != VK_SUCCESS) {
             throw std::runtime_error("failed to create instance!");
         }
