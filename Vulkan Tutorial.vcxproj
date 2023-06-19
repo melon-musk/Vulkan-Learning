@@ -136,9 +136,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="VkInsatnceBuilder.cpp" />
     <ClCompile Include="WindowingSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="VkInstanceBuilder.hpp" />
     <ClInclude Include="WindowingSystem.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -21,9 +21,15 @@
     <ClCompile Include="WindowingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="VkInsatnceBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowingSystem.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VkInstanceBuilder.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

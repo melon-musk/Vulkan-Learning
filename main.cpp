@@ -6,6 +6,7 @@
 #include<cstring>
 #include<optional>
 #include "WindowingSystem.hpp"
+#include "VkInstanceBuilder.hpp"
 #include <set>
 #include <vulkan/vk_enum_string_helper.h>
 
@@ -342,23 +343,13 @@ private:
             throw std::runtime_error("validation layers requested, but not available!");
         }
 
-        VkApplicationInfo appInfo{};
-        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = "Hello Triangle";
-        appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
-        appInfo.pEngineName = "No Engine";
-        appInfo.engineVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
-        appInfo.apiVersion = VK_API_VERSION_1_0;
-
-        VkInstanceCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        createInfo.pApplicationInfo = &appInfo;
+        VkInstanceBuilder vkb;
+        VkInstanceCreateInfo createInfo = {};
 
         //currently gets glfwextensions
         auto extensions = getRequiredExtensions();
-
-        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-        createInfo.ppEnabledExtensionNames = extensions.data();
+        vkb.enabledExtensions(extensions);
+        createInfo = vkb.build();
 
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
         if (enableValidationLayers) {
@@ -367,15 +358,11 @@ private:
             populateDebugMessengerCreateInfo(debugCreateInfo);
             createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
         }
-        else {
-            createInfo.enabledLayerCount = 0;
-
-            createInfo.pNext = nullptr;
-        }
 
         if (vkCreateInstance(&createInfo, nullptr, &myVK_instance) != VK_SUCCESS) {
             throw std::runtime_error("failed to create instance!");
         }
+
 
         //check to see what extensions VK supports
        /* uint32_t extensionCount = 0;
