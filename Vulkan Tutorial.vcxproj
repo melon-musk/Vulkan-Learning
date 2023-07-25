@@ -135,11 +135,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AllStructs.hpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="QueueFamilyIndices.cpp" />
     <ClCompile Include="VkInsatnceBuilder.cpp" />
     <ClCompile Include="WindowingSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="QueueFamilyIndices.hpp" />
     <ClInclude Include="VkInstanceBuilder.hpp" />
     <ClInclude Include="WindowingSystem.hpp" />
   </ItemGroup>

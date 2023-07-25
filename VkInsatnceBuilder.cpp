@@ -5,7 +5,6 @@
 	VkInstanceBuilder::VkInstanceBuilder()
 	{
 		//defaults i guess, there's got to be a better way to this
-		std::cout << "constructor" << std::endl;
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 		appInfo.pApplicationName = "Hello Triangle";
 		appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
