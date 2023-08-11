@@ -909,6 +909,8 @@ private:
             glfwPollEvents();
             drawFrame();
         }
+
+        vkDeviceWaitIdle(logicalDevice);
     }
 
     void cleanup() {
