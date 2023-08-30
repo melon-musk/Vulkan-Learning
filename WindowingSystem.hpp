@@ -11,12 +11,11 @@
 		~WindowSys();
 		bool shouldClose();
 		GLFWwindow* getGLFWwindow();
+		void setUserPointer(void* ptr);
 
 	private:
 		const uint32_t WIDTH = 800;
 		const uint32_t HEIGHT = 600;
 		GLFWwindow* window;
-
 		void initWindow();
-		
 	};

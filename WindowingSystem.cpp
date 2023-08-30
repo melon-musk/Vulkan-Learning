@@ -1,4 +1,12 @@
 #include "WindowingSystem.hpp"
+#include <iostream>
+
+
+static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
+	std::cout << "FRAME RESIED " <<std::endl;
+	bool* frameBufferResized = (bool*)glfwGetWindowUserPointer(window);
+	*frameBufferResized = true;
+}
 
 	WindowSys::WindowSys()
 	{
@@ -15,13 +23,19 @@
 	{
 		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-		WindowSys::window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
+		window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
+		glfwSetFramebufferSizeCallback(WindowSys::window, framebufferResizeCallback);
 	}
+
 
 	bool WindowSys::shouldClose()
 	{
 		return glfwWindowShouldClose(WindowSys::window);
+	}
+
+	void WindowSys::setUserPointer(void* ptr)
+	{
+		glfwSetWindowUserPointer(window, ptr);
 	}
 
 	GLFWwindow* WindowSys::getGLFWwindow()
